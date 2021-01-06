@@ -1,1 +1,5 @@
-# PracticaSistemasOperativos2
+Erick David Cardenas Silva
+
+Alvaro Martinez Parpolowicz
+
+Jorge Tesch Torres
