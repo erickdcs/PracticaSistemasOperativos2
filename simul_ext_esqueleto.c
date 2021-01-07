@@ -7,7 +7,7 @@
 
 void Printbytemaps(EXT_BYTE_MAPS *ext_bytemaps);
 int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argumento2);
-void LeeSuperBloque(EXT_SIMPLE_SUPERBLOCK *psup);
+void LeeSuperBloque(EXT_SIMPLE_SUPERBLOCK *ext_superblock);
 int BuscaFich(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, 
               char *nombre);
 void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos);
@@ -37,7 +37,7 @@ int main()
 	 unsigned long int m;
      EXT_SIMPLE_SUPERBLOCK ext_superblock;
      EXT_BYTE_MAPS ext_bytemaps[MAX_INODOS];
-     EXT_BLQ_INODOS ext_blq_inodos[MAX_INODOS*SIZE_BLOQUE];
+     EXT_BLQ_INODOS ext_blq_inodos[MAX_NUMS_BLOQUE_INODO*SIZE_BLOQUE];
      EXT_ENTRADA_DIR directorio[MAX_FICHEROS];
      EXT_DATOS memdatos[MAX_BLOQUES_DATOS];
      EXT_DATOS datosfich[MAX_BLOQUES_PARTICION];
@@ -57,9 +57,9 @@ int main()
      memcpy(&ext_bytemaps,(EXT_BLQ_INODOS *)&datosfich[1], SIZE_BLOQUE);
      memcpy(&ext_blq_inodos,(EXT_BLQ_INODOS *)&datosfich[2], SIZE_BLOQUE);
      memcpy(&memdatos,(EXT_DATOS *)&datosfich[4],MAX_BLOQUES_DATOS*SIZE_BLOQUE);
-	 
-	 //printf("Bloque: %d bytes\nInodosParticion: %d\nInodos libres: %d\nBloques Particion: %d\nBloques libres: %d\nPrimer bloque de datos: %D\n",SIZE_BLOQUE,ext_superblock.s_inodes_count, ext_superblock.s_free_inodes_count, ext_superblock.s_blocks_count, ext_superblock.s_free_blocks_count, ext_superblock.s_first_data_block);
-	 info(ext_superblock);
+	 LeeSuperBloque(&ext_superblock);
+	 Printbytemaps(&ext_bytemaps);
+	 Directorio(directorio, ext_blq_inodos);
      /*
      // Buce de tratamiento de comandos
      for (;;){
@@ -90,6 +90,35 @@ int main()
      }*/
 }
 
-void info(EXT_SIMPLE_SUPERBLOCK ext_superblock){
-	printf("Bloque: %d bytes\nInodosParticion: %d\nInodos libres: %d\nBloques Particion: %d\nBloques libres: %d\nPrimer bloque de datos: %D\n",SIZE_BLOQUE,ext_superblock.s_inodes_count, ext_superblock.s_free_inodes_count, ext_superblock.s_blocks_count, ext_superblock.s_free_blocks_count, ext_superblock.s_first_data_block);
-}	
+void LeeSuperBloque(EXT_SIMPLE_SUPERBLOCK *ext_superblock){
+	printf("Bloque: %d bytes\nInodosParticion: %d\nInodos libres: %d\nBloques Particion: %d\nBloques libres: %d\nPrimer bloque de datos: %d\n",SIZE_BLOQUE,ext_superblock->s_inodes_count, ext_superblock->s_free_inodes_count, ext_superblock->s_blocks_count, ext_superblock->s_free_blocks_count, ext_superblock->s_first_data_block);
+}
+	
+void Printbytemaps(EXT_BYTE_MAPS *ext_bytemaps){
+	int i = 0;
+	printf("Inodos : ");
+	for(i=0; i < MAX_INODOS;i++){
+		printf("%d ", ext_bytemaps->bmap_inodos[i]);
+	}
+	printf("\nBloques [0-25] :");
+	for(i=0; i < 25;i++){
+		printf("%d ", ext_bytemaps->bmap_bloques[i]);
+	}
+	printf("\n");
+}
+
+void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos){
+	int i =0;
+	int j =0;
+	int a= 0;
+	for(i=3; i < 4; i++){
+		printf("%s\t",directorio[i].dir_nfich);
+		printf("Tamaño: %d\t", inodos->blq_inodos[directorio[i].dir_inodo].size_fichero);
+		printf("Inodo: %d\t", directorio[i].dir_inodo);
+		printf("Bloques: ");
+		for(j =0; j < MAX_NUMS_BLOQUE_INODO; j++){
+			printf("%d ",inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j]);
+		}
+	}
+	
+}
