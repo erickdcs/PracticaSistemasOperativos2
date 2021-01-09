@@ -111,14 +111,17 @@ void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos){
 	int i =0;
 	int j =0;
 	int a= 0;
-	for(i=3; i < 4; i++){
+	int nada = 0xffff;
+	for(i=1; directorio[i].dir_inodo!= nada; i++){
 		printf("%s\t",directorio[i].dir_nfich);
 		printf("Tamaño: %d\t", inodos->blq_inodos[directorio[i].dir_inodo].size_fichero);
 		printf("Inodo: %d\t", directorio[i].dir_inodo);
 		printf("Bloques: ");
-		for(j =0; j < MAX_NUMS_BLOQUE_INODO; j++){
-			printf("%d ",inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j]);
+		for(j =0; j < MAX_NUMS_BLOQUE_INODO && inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j] != nada; j++){
+				printf("%d ",inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j]);
 		}
+		printf("\n");
+
 	}
 	
 }
