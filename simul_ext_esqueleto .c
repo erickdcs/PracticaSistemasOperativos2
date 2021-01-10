@@ -60,6 +60,9 @@ int main()
 	 LeeSuperBloque(&ext_superblock);
 	 Printbytemaps(&ext_bytemaps);
 	 Directorio(directorio, ext_blq_inodos);
+	 Copiar(directorio, ext_blq_inodos,ext_bytemaps, &ext_superblock,memdatos, "BelloGal.txt", "Cesar.txt",  fent);
+	 Directorio(directorio, ext_blq_inodos);
+	 LeeSuperBloque(&ext_superblock);
      /*
      // Buce de tratamiento de comandos
      for (;;){
@@ -124,4 +127,74 @@ void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos){
 
 	}
 	
+}
+int Copiar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos,
+           EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock,
+           EXT_DATOS *memdatos, char *nombreorigen, char *nombredestino,  FILE *fich){
+	//Variables
+	int i,j;//iteradores
+	int error = 1;
+	int iFicheroOrigen, iFicheroDestino; //indice de los ficheros en el directorio
+	
+	//Comprobar que el fichero origen existe
+	for(i = 1; directorio[i].dir_inodo!= 0xffff; i++){
+		if(strcmp(directorio[i].dir_nfich,nombreorigen)==0){
+			error = 0; 
+			iFicheroOrigen=i;
+		}
+	}
+	if(error==1){
+		printf("El nombre del fichero origen no existe\n");
+		return -1;
+	}
+	//Comprobar que el destino no existe
+	for(i = 1; directorio[i].dir_inodo!= 0xffff; i++){
+		if(strcmp(directorio[i].dir_nfich,nombredestino)==0){
+			printf("El nombre del fichero destino ya existe\n");
+			return -1;
+		}
+	} 
+	iFicheroDestino = i;//Si no ha habido errores i sera igual al numero total de ficheros en el directorio
+	if(iFicheroDestino >= MAX_FICHEROS){ //Aunque no sea necesario comprobamos que no se exceda el numero maximo de ficheros para evitar errores
+		printf("Se ha excedido el numero maximo de ficheros\n");
+		return -1;
+	}
+	strcpy(directorio[iFicheroDestino].dir_nfich, nombredestino);
+	
+	
+	
+	//Asignarle el primer inodo libre
+	for(i=0; i < MAX_INODOS; i++){
+		if(ext_bytemaps->bmap_inodos[i]==0){
+			directorio[iFicheroDestino].dir_inodo = i; //Actualizamos el directorio
+			inodos->blq_inodos[i].size_fichero = inodos->blq_inodos[directorio[iFicheroOrigen].dir_inodo].size_fichero; //Actualizamos su tamaño
+			ext_bytemaps->bmap_inodos[i]=1;//Marcar el inodo como ocupado
+			ext_superblock->s_free_inodes_count--;//Actualizar el superbloque
+			break;
+		}
+	}
+		
+	
+	for(j=0; inodos->blq_inodos[directorio[iFicheroOrigen].dir_inodo].i_nbloque[j]!= 0xffff;j++){	
+		for(i=0; i < MAX_BLOQUES_PARTICION; i++){
+			if(ext_bytemaps->bmap_bloques[i]==0){
+				memcpy(&memdatos[inodos->blq_inodos[directorio[iFicheroOrigen].dir_inodo].i_nbloque[j]],&memdatos[i], SIZE_BLOQUE ); //Copiar los bloques 
+				
+				inodos->blq_inodos[directorio[iFicheroDestino].dir_inodo].i_nbloque[j] = i; //Asignar los bloques al inodo destino
+				
+				ext_bytemaps->bmap_bloques[i]=1;//Marcar los bloques como ocupados
+				
+				//Actualizar el superbloque
+				ext_superblock->s_free_blocks_count--;
+				if(ext_superblock->s_first_data_block > i) ext_superblock->s_first_data_block = i;
+				
+				break;
+			}
+		}
+	}
+	/* Grabarinodosydirectorio(directorio, inodos, fich);
+	GrabarByteMaps(ext_bytemaps, fich);
+	GrabarSuperBloque(ext_superblock, fich);
+	GrabarDatos(memdatos, fich);*/
+			   
 }
