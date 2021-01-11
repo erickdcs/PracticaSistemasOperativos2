@@ -103,11 +103,14 @@ int main()
 		 */
          //Si el comando es salir se habrán escrito todos los metadatos
          //faltan los datos y cerrar
-         if (strcmp(orden,"salir")==0){
+         else if (strcmp(orden,"salir")==0){
             //GrabarDatos(&memdatos,fent);
             fclose(fent);
             return 0;
          }
+		 else{
+			 printf("ERROR: Comando ilegal [info, bytemaps, dir, rename, imprimir, remove, copy, salir]\n");
+		 }
      }
 }
 
