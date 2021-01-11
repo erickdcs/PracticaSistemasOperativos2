@@ -45,9 +45,7 @@ int main()
      int grabardatos;
      FILE *fent;
      
-     // Lectura del fichero completo de una sola vez
-     
-     
+     // Lectura del fichero completo de una sola vez  
      fent = fopen("particion.bin","r+b");
      fread(&datosfich, SIZE_BLOQUE, MAX_BLOQUES_PARTICION, fent);    
      
@@ -58,30 +56,43 @@ int main()
      memcpy(&ext_blq_inodos,(EXT_BLQ_INODOS *)&datosfich[2], SIZE_BLOQUE);
      memcpy(&memdatos,(EXT_DATOS *)&datosfich[4],MAX_BLOQUES_DATOS*SIZE_BLOQUE);
 	 
-	 /*
-	 LeeSuperBloque(&ext_superblock);
-	 Printbytemaps(&ext_bytemaps);
-	 Directorio(directorio, ext_blq_inodos);
-	 */
- 
-	 Copiar(directorio, ext_blq_inodos,ext_bytemaps, &ext_superblock, memdatos, "BelloGal.txt", "Cesar.txt",  fent);
-	 Directorio(directorio, ext_blq_inodos);
-	 Imprimir(directorio, ext_blq_inodos, memdatos, "BelloGal.txt");
-	 Imprimir(directorio, ext_blq_inodos, memdatos, "Cesar.txt");
-	 
-     /*
      // Buce de tratamiento de comandos
      for (;;){
-		 do {
-		 printf (">> ");
+		 do{
+		 printf ("\n>> ");
 		 fflush(stdin);
 		 fgets(comando, LONGITUD_COMANDO, stdin);
-		 } while (ComprobarComando(comando,orden,argumento1,argumento2) !=0);
-	     if (strcmp(orden,"dir")==0) {
-            Directorio(&directorio,&ext_blq_inodos);
+		 }while (ComprobarComando(comando, orden, argumento1, argumento2) != 0);
+		 
+	     if (strcmp(orden,"dir")==0){
+            Directorio(directorio, ext_blq_inodos);
             continue;
-            }
-        
+		 }
+		 
+		 else if(strcmp(orden,"info")==0){
+			 LeeSuperBloque(&ext_superblock);
+		 }
+		 
+         else if(strcmp(orden,"bytemaps")==0){
+			 Printbytemaps(&ext_bytemaps);
+		 }
+		 
+		 else if(strcmp(orden,"rename")==0){
+			 
+		 }
+		 
+		 else if(strcmp(orden,"imprimir")==0){
+			 Imprimir(directorio, ext_blq_inodos, memdatos, argumento1);
+		 }
+		 
+		 else if(strcmp(orden,"remove")==0){
+			 
+		 }
+		 
+		 else if(strcmp(orden,"copy")==0){
+			 Copiar(directorio, ext_blq_inodos,ext_bytemaps, &ext_superblock, memdatos, argumento1, argumento2,  fent);
+		 }
+		 /*
          // Escritura de metadatos en comandos rename, remove, copy     
          Grabarinodosydirectorio(&directorio,&ext_blq_inodos,fent);
          GrabarByteMaps(&ext_bytemaps,fent);
@@ -89,14 +100,44 @@ int main()
          if (grabardatos)
            GrabarDatos(&memdatos,fent);
          grabardatos = 0;
+		 */
          //Si el comando es salir se habrán escrito todos los metadatos
          //faltan los datos y cerrar
          if (strcmp(orden,"salir")==0){
-            GrabarDatos(&memdatos,fent);
+            //GrabarDatos(&memdatos,fent);
             fclose(fent);
             return 0;
          }
-     }*/
+     }
+}
+
+int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argumento2){
+	char* token;
+
+	if(strcmp(strcomando, "\n") == 0){
+		return -1;
+	}
+	
+	memcpy(orden, "\0", LONGITUD_COMANDO);
+	memcpy(argumento1, "\0", LONGITUD_COMANDO); 
+	memcpy(argumento2, "\0", LONGITUD_COMANDO); 
+	
+	token = strtok(strcomando, "\n");
+	memcpy(strcomando, token, LONGITUD_COMANDO); 
+	
+	token = strtok(strcomando, " ");
+	memcpy(orden, token, LONGITUD_COMANDO); 
+
+	token = strtok(NULL, " ");
+	if(token != NULL){
+		memcpy(argumento1, token, LONGITUD_COMANDO); 
+		token = strtok(NULL, " ");
+		if(token != NULL){
+			memcpy(argumento2, token, LONGITUD_COMANDO); 
+		}
+	}
+
+	return 0;
 }
 
 void LeeSuperBloque(EXT_SIMPLE_SUPERBLOCK *ext_superblock){
@@ -117,9 +158,9 @@ void Printbytemaps(EXT_BYTE_MAPS *ext_bytemaps){
 }
 
 void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos){
-	int i =0;
-	int j =0;
-	int a= 0;
+	int i = 0;
+	int j = 0;
+	int a = 0;
 	int nada = 0xffff;
 	for(i=1; directorio[i].dir_inodo!= nada; i++){
 		printf("%s\t",directorio[i].dir_nfich);
@@ -152,7 +193,7 @@ int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *mem
 	
 	//Mostras mensaje de error si el fichero no exite
 	if(error==1){
-		printf("ERROR: Fichero %s no encontrado", nombre);
+		printf("ERROR: Fichero %s no encontrado\n", nombre);
 		return -1;
 	}
 	
