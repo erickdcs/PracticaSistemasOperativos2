@@ -57,12 +57,18 @@ int main()
      memcpy(&ext_bytemaps,(EXT_BLQ_INODOS *)&datosfich[1], SIZE_BLOQUE);
      memcpy(&ext_blq_inodos,(EXT_BLQ_INODOS *)&datosfich[2], SIZE_BLOQUE);
      memcpy(&memdatos,(EXT_DATOS *)&datosfich[4],MAX_BLOQUES_DATOS*SIZE_BLOQUE);
+	 
+	 /*
 	 LeeSuperBloque(&ext_superblock);
 	 Printbytemaps(&ext_bytemaps);
 	 Directorio(directorio, ext_blq_inodos);
-	 Copiar(directorio, ext_blq_inodos,ext_bytemaps, &ext_superblock,memdatos, "BelloGal.txt", "Cesar.txt",  fent);
+	 */
+ 
+	 Copiar(directorio, ext_blq_inodos,ext_bytemaps, &ext_superblock, memdatos, "BelloGal.txt", "Cesar.txt",  fent);
 	 Directorio(directorio, ext_blq_inodos);
-	 LeeSuperBloque(&ext_superblock);
+	 Imprimir(directorio, ext_blq_inodos, memdatos, "BelloGal.txt");
+	 Imprimir(directorio, ext_blq_inodos, memdatos, "Cesar.txt");
+	 
      /*
      // Buce de tratamiento de comandos
      for (;;){
@@ -128,6 +134,41 @@ void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos){
 	}
 	
 }
+
+int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *memdatos, char *nombre){
+	//Variables
+	int i,j;//iteradores
+	int error = 1;
+	int iFichero; //indice del fichero en el directorio
+	EXT_DATOS texto[7];
+	
+	//Comprobar que el fichero introducido existe
+	for(i = 1; directorio[i].dir_inodo!= 0xffff; i++){
+		if(strcmp(directorio[i].dir_nfich,nombre)==0){
+			error = 0; 
+			iFichero=i;
+		}
+	}
+	
+	//Mostras mensaje de error si el fichero no exite
+	if(error==1){
+		printf("ERROR: Fichero %s no encontrado", nombre);
+		return -1;
+	}
+	
+	//Copiamos en la variable texto los datos de los bloques que ocupa el fichero en memdatos
+	for(i = 0; i < MAX_NUMS_BLOQUE_INODO && inodos->blq_inodos[directorio[iFichero].dir_inodo].i_nbloque[i] != 0xffff; i++){
+		memcpy(&texto[i], &memdatos[inodos->blq_inodos[directorio[iFichero].dir_inodo].i_nbloque[i] - PRIM_BLOQUE_DATOS], SIZE_BLOQUE);
+	}
+	
+	//Colocamos un \0 al final del texto
+	memcpy(&texto[i], "\0", 1);
+	
+	//Imprimimos el texto por pantalla
+	puts(texto);
+	return 0;
+}
+
 int Copiar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos,
            EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock,
            EXT_DATOS *memdatos, char *nombreorigen, char *nombredestino,  FILE *fich){
@@ -178,7 +219,7 @@ int Copiar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos,
 	for(j=0; inodos->blq_inodos[directorio[iFicheroOrigen].dir_inodo].i_nbloque[j]!= 0xffff;j++){	
 		for(i=0; i < MAX_BLOQUES_PARTICION; i++){
 			if(ext_bytemaps->bmap_bloques[i]==0){
-				memcpy(&memdatos[inodos->blq_inodos[directorio[iFicheroOrigen].dir_inodo].i_nbloque[j]],&memdatos[i], SIZE_BLOQUE ); //Copiar los bloques 
+				memcpy(&memdatos[inodos->blq_inodos[directorio[iFicheroOrigen].dir_inodo].i_nbloque[j]] , &memdatos[i], SIZE_BLOQUE ); //Copiar los bloques 
 				
 				inodos->blq_inodos[directorio[iFicheroDestino].dir_inodo].i_nbloque[j] = i; //Asignar los bloques al inodo destino
 				
