@@ -71,26 +71,32 @@ int main()
 		 
 		 else if(strcmp(orden,"info")==0){
 			 LeeSuperBloque(&ext_superblock);
+			 continue;
 		 }
 		 
          else if(strcmp(orden,"bytemaps")==0){
 			 Printbytemaps(&ext_bytemaps);
+			 continue;
 		 }
 		 
 		 else if(strcmp(orden,"rename")==0){
-			 
+			 Renombrar(directorio, ext_blq_inodos, argumento1, argumento2);
+			 continue;
 		 }
 		 
 		 else if(strcmp(orden,"imprimir")==0){
 			 Imprimir(directorio, ext_blq_inodos, memdatos, argumento1);
+			 continue;
 		 }
 		 
 		 else if(strcmp(orden,"remove")==0){
-			 
+			 Borrar(directorio, ext_blq_inodos, ext_bytemaps, &ext_superblock, argumento1,  fent);
+			 continue;
 		 }
 		 
 		 else if(strcmp(orden,"copy")==0){
-			 Copiar(directorio, ext_blq_inodos,ext_bytemaps, &ext_superblock, memdatos, argumento1, argumento2,  fent);
+			 Copiar(directorio, ext_blq_inodos, ext_bytemaps, &ext_superblock, memdatos, argumento1, argumento2,  fent);
+			 continue;
 		 }
 		 /*
          // Escritura de metadatos en comandos rename, remove, copy     
@@ -110,27 +116,33 @@ int main()
          }
 		 else{
 			 printf("ERROR: Comando ilegal [info, bytemaps, dir, rename, imprimir, remove, copy, salir]\n");
+			 continue;
 		 }
      }
 }
 
 int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argumento2){
 	char* token;
-
+	
+	//En el caso de que el usuario realice una entrada vacia, esta no se tiene en cuenta
 	if(strcmp(strcomando, "\n") == 0){
 		return -1;
 	}
 	
+	//Inicializamos todos los argumentos para que esten vacios
 	memcpy(orden, "\0", LONGITUD_COMANDO);
 	memcpy(argumento1, "\0", LONGITUD_COMANDO); 
 	memcpy(argumento2, "\0", LONGITUD_COMANDO); 
 	
+	//Quitamos el salto de linea que deja fgets para que no nos de problemas posteriormente
 	token = strtok(strcomando, "\n");
 	memcpy(strcomando, token, LONGITUD_COMANDO); 
 	
+	//Extremos la orden con strtok
 	token = strtok(strcomando, " ");
 	memcpy(orden, token, LONGITUD_COMANDO); 
-
+	
+	//En el caso de existir, realizamos lo mismo para el argumento1 y argumento2
 	token = strtok(NULL, " ");
 	if(token != NULL){
 		memcpy(argumento1, token, LONGITUD_COMANDO); 
@@ -180,8 +192,8 @@ void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos){
 	}
 	
 }
-int Renombrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, 
-              char *nombreantiguo, char *nombrenuevo){
+
+int Renombrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombreantiguo, char *nombrenuevo){
 	int i,j;//iteradores
 	int error = 1;
 	int iFichero = 0;
@@ -208,6 +220,7 @@ int Renombrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos,
 	strcpy(&directorio[iFichero].dir_nfich, nombrenuevo);
 	return 0;
 }
+
 int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *memdatos, char *nombre){
 	//Variables
 	int i,j;//iteradores
@@ -241,9 +254,8 @@ int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *mem
 	puts(texto);
 	return 0;
 }
-int Borrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos,
-           EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock,
-           char *nombre,  FILE *fich){
+
+int Borrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock, char *nombre,  FILE *fich){
 	int i;//iteradores
 	int error = 1;
 	int iFichero; //indice del fichero en el directorio
@@ -266,9 +278,8 @@ int Borrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos,
 	}
 	return 0;
 }
-int Copiar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos,
-           EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock,
-           EXT_DATOS *memdatos, char *nombreorigen, char *nombredestino,  FILE *fich){
+
+int Copiar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock, EXT_DATOS *memdatos, char *nombreorigen, char *nombredestino,  FILE *fich){
 	//Variables
 	int i,j;//iteradores
 	int error = 1;
