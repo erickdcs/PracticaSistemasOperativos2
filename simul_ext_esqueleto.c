@@ -165,20 +165,49 @@ void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos){
 	int j = 0;
 	int a = 0;
 	int nada = 0xffff;
-	for(i=1; directorio[i].dir_inodo!= nada; i++){
-		printf("%s\t",directorio[i].dir_nfich);
-		printf("Tamaño: %d\t", inodos->blq_inodos[directorio[i].dir_inodo].size_fichero);
-		printf("Inodo: %d\t", directorio[i].dir_inodo);
-		printf("Bloques: ");
-		for(j =0; j < MAX_NUMS_BLOQUE_INODO && inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j] != nada; j++){
-				printf("%d ",inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j]);
+	for(i=1; i < MAX_FICHEROS; i++){
+		if(directorio[i].dir_inodo!= nada){
+			printf("%s\t",directorio[i].dir_nfich);
+			printf("Tamaño: %d\t", inodos->blq_inodos[directorio[i].dir_inodo].size_fichero);
+			printf("Inodo: %d\t", directorio[i].dir_inodo);
+			printf("Bloques: ");
+			for(j =0; j < MAX_NUMS_BLOQUE_INODO && inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j] != nada; j++){
+					printf("%d ",inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j]);
+			}
+			printf("\n");
 		}
-		printf("\n");
 
 	}
 	
 }
-
+int Renombrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, 
+              char *nombreantiguo, char *nombrenuevo){
+	int i,j;//iteradores
+	int error = 1;
+	int iFichero = 0;
+	//Comprobar que el fichero introducido existe
+	for(i = 1; i < MAX_FICHEROS; i++){
+		if(strcmp(directorio[i].dir_nfich,nombreantiguo)==0){
+			error = 0; 
+			iFichero = i;
+		}
+	}
+	for(j =0; j < MAX_FICHEROS; j++){
+		if(strcmp(directorio[j].dir_nfich,nombrenuevo)==0){
+			error = 2; 
+		}
+	}
+	if(error == 1){
+		printf("ERROR: Fichero %s no encontrado\n", nombreantiguo);
+		return -1;
+	}
+	if(error == 2){
+		printf("ERROR: Ya existe un fichero con ese nombre\n",nombrenuevo);
+		return -1;
+	}
+	strcpy(&directorio[iFichero].dir_nfich, nombrenuevo);
+	return 0;
+}
 int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *memdatos, char *nombre){
 	//Variables
 	int i,j;//iteradores
@@ -187,7 +216,7 @@ int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *mem
 	EXT_DATOS texto[7];
 	
 	//Comprobar que el fichero introducido existe
-	for(i = 1; directorio[i].dir_inodo!= 0xffff; i++){
+	for(i = 1; i < MAX_FICHEROS; i++){
 		if(strcmp(directorio[i].dir_nfich,nombre)==0){
 			error = 0; 
 			iFichero=i;
@@ -212,7 +241,31 @@ int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *mem
 	puts(texto);
 	return 0;
 }
-
+int Borrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos,
+           EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock,
+           char *nombre,  FILE *fich){
+	int i;//iteradores
+	int error = 1;
+	int iFichero; //indice del fichero en el directorio
+	//Comprobar que el fichero introducido existe
+	for(i = 1; directorio[i].dir_inodo!= 0xffff; i++){
+		if(strcmp(directorio[i].dir_nfich,nombre)==0){
+			error = 0; 
+			iFichero=i;
+		}
+	}
+	if(error == 1){
+		printf("ERROR: Fichero %s no encontrado\n", nombre);
+		return -1;
+	}
+	directorio[iFichero].dir_inodo = 0xffff;
+	strcpy(&directorio[iFichero].dir_nfich, "");
+	inodos->blq_inodos[directorio[iFichero].dir_inodo].size_fichero = 0;
+	for(i = 0; i < MAX_NUMS_BLOQUE_INODO && inodos->blq_inodos[directorio[iFichero].dir_inodo].i_nbloque[i] != 0xffff; i++){
+		inodos->blq_inodos[directorio[iFichero].dir_inodo].i_nbloque[i] = 0xffff;	
+	}
+	return 0;
+}
 int Copiar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos,
            EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock,
            EXT_DATOS *memdatos, char *nombreorigen, char *nombredestino,  FILE *fich){
@@ -222,7 +275,7 @@ int Copiar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos,
 	int iFicheroOrigen, iFicheroDestino; //indice de los ficheros en el directorio
 	
 	//Comprobar que el fichero origen existe
-	for(i = 1; directorio[i].dir_inodo!= 0xffff; i++){
+	for(i = 1; i < MAX_FICHEROS; i++){
 		if(strcmp(directorio[i].dir_nfich,nombreorigen)==0){
 			error = 0; 
 			iFicheroOrigen=i;
@@ -233,7 +286,7 @@ int Copiar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos,
 		return -1;
 	}
 	//Comprobar que el destino no existe
-	for(i = 1; directorio[i].dir_inodo!= 0xffff; i++){
+	for(i = 1; i < MAX_FICHEROS; i++){
 		if(strcmp(directorio[i].dir_nfich,nombredestino)==0){
 			printf("El nombre del fichero destino ya existe\n");
 			return -1;
