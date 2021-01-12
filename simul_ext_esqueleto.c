@@ -263,8 +263,8 @@ int Copiar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos,
 	for(j=0; inodos->blq_inodos[directorio[iFicheroOrigen].dir_inodo].i_nbloque[j]!= 0xffff;j++){	
 		for(i=0; i < MAX_BLOQUES_PARTICION; i++){
 			if(ext_bytemaps->bmap_bloques[i]==0){
-				memcpy(&memdatos[inodos->blq_inodos[directorio[iFicheroOrigen].dir_inodo].i_nbloque[j]] , &memdatos[i], SIZE_BLOQUE ); //Copiar los bloques 
-				
+				memcpy(&memdatos[i-PRIM_BLOQUE_DATOS],&memdatos[inodos->blq_inodos[directorio[iFicheroOrigen].dir_inodo].i_nbloque[j]-PRIM_BLOQUE_DATOS] , SIZE_BLOQUE ); //Copiar los bloques 
+
 				inodos->blq_inodos[directorio[iFicheroDestino].dir_inodo].i_nbloque[j] = i; //Asignar los bloques al inodo destino
 				
 				ext_bytemaps->bmap_bloques[i]=1;//Marcar los bloques como ocupados
