@@ -301,7 +301,9 @@ int Borrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_BYTE_MAPS *e
 	directorio[iFichero].dir_inodo = NULL_INODO; 
 	
 	ext_superblock->s_free_inodes_count++;//Actualizar el superbloque
-	
+	for(i = iFichero; i < MAX_FICHEROS-1; i++){
+		directorio[i] = directorio[i+1];
+	}
 	return 0;
 }
 
