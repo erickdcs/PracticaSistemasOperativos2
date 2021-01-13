@@ -169,7 +169,11 @@ int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argu
 }
 
 void LeeSuperBloque(EXT_SIMPLE_SUPERBLOCK *ext_superblock){
-	printf("Bloque: %d bytes\nInodosParticion: %d\nInodos libres: %d\nBloques Particion: %d\nBloques libres: %d\nPrimer bloque de datos: %d\n",SIZE_BLOQUE,ext_superblock->s_inodes_count, ext_superblock->s_free_inodes_count, ext_superblock->s_blocks_count, ext_superblock->s_free_blocks_count, ext_superblock->s_first_data_block);
+	printf("Bloque: %d bytes\n",SIZE_BLOQUE,ext_superblock->s_inodes_count);
+	printf("InodosParticion: %d\n", ext_superblock->s_free_inodes_count);
+	printf("Inodos libres: %d\n", ext_superblock->s_blocks_count)
+	printf("Bloques Particion: %d\n", ext_superblock->s_free_blocks_count);
+	printf("Bloques libres: %d\nPrimer bloque de datos: %d\n", ext_superblock->s_first_data_block);
 }
 	
 void Printbytemaps(EXT_BYTE_MAPS *ext_bytemaps){
