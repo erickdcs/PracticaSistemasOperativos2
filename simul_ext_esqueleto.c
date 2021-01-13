@@ -283,12 +283,25 @@ int Borrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_BYTE_MAPS *e
 		printf("ERROR: Fichero %s no encontrado\n", nombre);
 		return -1;
 	}
-	directorio[iFichero].dir_inodo = 0xffff;
-	strcpy(&directorio[iFichero].dir_nfich, "");
-	inodos->blq_inodos[directorio[iFichero].dir_inodo].size_fichero = 0;
-	for(i = 0; i < MAX_NUMS_BLOQUE_INODO && inodos->blq_inodos[directorio[iFichero].dir_inodo].i_nbloque[i] != 0xffff; i++){
-		inodos->blq_inodos[directorio[iFichero].dir_inodo].i_nbloque[i] = 0xffff;	
+	
+	ext_bytemaps->bmap_inodos[directorio[iFichero].dir_inodo]=0;//Marcar el inodo como libre
+	for(i =0; i < MAX_NUMS_BLOQUE_INODO && inodos->blq_inodos[directorio[iFichero].dir_inodo].i_nbloque[i]!= NULL_BLOQUE; i++){
+		ext_bytemaps->bmap_bloques[inodos->blq_inodos[directorio[iFichero].dir_inodo].i_nbloque[i]]=0; //Marcar los bloques como vacios
 	}
+	inodos->blq_inodos[directorio[iFichero].dir_inodo].size_fichero = 0; //Actualizamos su tamaño
+	
+	for(i =0; i < MAX_NUMS_BLOQUE_INODO && inodos->blq_inodos[directorio[iFichero].dir_inodo].i_nbloque[i] != NULL_BLOQUE; i++){
+		inodos->blq_inodos[directorio[iFichero].dir_inodo].i_nbloque[i] = NULL_BLOQUE;	//Devuelve el inodo a por defecto
+		ext_superblock->s_free_blocks_count++;	//Actualizar superbloque
+		
+	}
+	
+	//Actualizamos el directorio
+	strcpy(&directorio[iFichero].dir_nfich, "");
+	directorio[iFichero].dir_inodo = NULL_INODO; 
+	
+	ext_superblock->s_free_inodes_count++;//Actualizar el superbloque
+	
 	return 0;
 }
 
