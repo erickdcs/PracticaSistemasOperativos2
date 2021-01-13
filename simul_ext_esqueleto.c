@@ -113,7 +113,7 @@ int main()
 		// Escritura de metadatos en comandos rename, remove, copy  
         if (grabardatos){
 			fclose(fent);
-			fent = fopen("particion.bin","r+b");
+			fent = fopen("particion.bin","w+b");
 			
 			GrabarSuperBloque(&ext_superblock,fent);
 			GrabarByteMaps(&ext_bytemaps,fent);
@@ -123,8 +123,6 @@ int main()
 			grabardatos = 0;
 		}
 		 
-        //Si el comando es salir se habrán escrito todos los metadatos
-        //faltan los datos y cerrar
 		if (strcmp(orden,"salir")==0){
            fclose(fent);
            return 0;
