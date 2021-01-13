@@ -190,17 +190,14 @@ void Printbytemaps(EXT_BYTE_MAPS *ext_bytemaps){
 }
 
 void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos){
-	int i = 0;
-	int j = 0;
-	int a = 0;
-	int nada = 0xffff;
-	for(i=1; i < MAX_FICHEROS; i++){
-		if(directorio[i].dir_inodo!= nada){
+	int i, j;
+	for(i=1; i < MAX_FICHEROS&& directorio[i].dir_inodo!= NULL_INODO; i++){
+		if(directorio[i].dir_inodo!= NULL_INODO){
 			printf("%s\t",directorio[i].dir_nfich);
 			printf("Tamaño: %d\t", inodos->blq_inodos[directorio[i].dir_inodo].size_fichero);
 			printf("Inodo: %d\t", directorio[i].dir_inodo);
 			printf("Bloques: ");
-			for(j =0; j < MAX_NUMS_BLOQUE_INODO && inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j] != nada; j++){
+			for(j =0; j < MAX_NUMS_BLOQUE_INODO && inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j] != NULL_INODO; j++){
 					printf("%d ",inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j]);
 			}
 			printf("\n");
@@ -211,18 +208,18 @@ void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos){
 }
 
 int Renombrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombreantiguo, char *nombrenuevo){
-	int i,j;//iteradores
+	int i;//iteradores
 	int error = 1;
 	int iFichero = 0;
 	//Comprobar que el fichero introducido existe
-	for(i = 1; i < MAX_FICHEROS; i++){
+	for(i = 1; i < MAX_FICHEROS&& directorio[i].dir_inodo!= NULL_INODO; i++){
 		if(strcmp(directorio[i].dir_nfich,nombreantiguo)==0){
 			error = 0; 
 			iFichero = i;
 		}
 	}
-	for(j =0; j < MAX_FICHEROS; j++){
-		if(strcmp(directorio[j].dir_nfich,nombrenuevo)==0){
+	for(i =0; j < MAX_FICHEROS&& directorio[iFichero].dir_inodo!= NULL_INODO; i++){
+		if(strcmp(directorio[i].dir_nfich,nombrenuevo)==0){
 			error = 2; 
 		}
 	}
@@ -240,13 +237,13 @@ int Renombrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombrea
 
 int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *memdatos, char *nombre){
 	//Variables
-	int i,j;//iteradores
+	int i;
 	int error = 1;
 	int iFichero; //indice del fichero en el directorio
 	EXT_DATOS texto[MAX_NUMS_BLOQUE_INODO];
 	
 	//Comprobar que el fichero introducido existe
-	for(i = 1; i < MAX_FICHEROS; i++){
+	for(i = 1; i < MAX_FICHEROS&& directorio[i].dir_inodo!= NULL_INODO; i++){
 		if(strcmp(directorio[i].dir_nfich,nombre)==0){
 			error = 0; 
 			iFichero=i;
