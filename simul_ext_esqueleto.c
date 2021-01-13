@@ -299,7 +299,7 @@ int Copiar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_BYTE_MAPS *e
 	int iFicheroOrigen, iFicheroDestino; //indice de los ficheros en el directorio
 	
 	//Comprobar que el fichero origen existe
-	for(i = 1; i < MAX_FICHEROS; i++){
+	for(i = 1; i < MAX_FICHEROS && directorio[i].dir_inodo!=NULL_INODO; i++){
 		if(strcmp(directorio[i].dir_nfich,nombreorigen)==0){
 			error = 0; 
 			iFicheroOrigen=i;
@@ -310,7 +310,7 @@ int Copiar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_BYTE_MAPS *e
 		return -1;
 	}
 	//Comprobar que el destino no existe
-	for(i = 1; i < MAX_FICHEROS; i++){
+	for(i = 1; i < MAX_FICHEROS && directorio[i].dir_inodo!=NULL_INODO; i++){
 		if(strcmp(directorio[i].dir_nfich,nombredestino)==0){
 			printf("El nombre del fichero destino ya existe\n");
 			return -1;
@@ -342,9 +342,7 @@ int Copiar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_BYTE_MAPS *e
 				ext_bytemaps->bmap_bloques[i]=1;//Marcar los bloques como ocupados
 				
 				//Actualizar el superbloque
-				ext_superblock->s_free_blocks_count--;
-				if(ext_superblock->s_first_data_block > i) ext_superblock->s_first_data_block = i;
-				
+				ext_superblock->s_free_blocks_count--;				
 				break;
 			}
 		}
