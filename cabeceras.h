@@ -1,4 +1,5 @@
 #define SIZE_BLOQUE 512
+#define MAX_INODOS 24
 #define MAX_FICHEROS 20
 #define MAX_BLOQUES_DATOS 96
 #define PRIM_BLOQUE_DATOS 4
@@ -8,7 +9,7 @@
 #define LEN_NFICH 17
 #define NULL_INODO 0xFFFF
 #define NULL_BLOQUE 0xFFFF
-#define MAX_INODOS 7
+
 /* Estructura del superbloque */
 typedef struct {
   unsigned int s_inodes_count;          /* inodos de la partición */
