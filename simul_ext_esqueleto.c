@@ -37,8 +37,8 @@ int main()
 	unsigned long int m;
 	int comandoDesconocido;
     EXT_SIMPLE_SUPERBLOCK ext_superblock;
-    EXT_BYTE_MAPS ext_bytemaps[MAX_INODOS];
-    EXT_BLQ_INODOS ext_blq_inodos[MAX_NUMS_BLOQUE_INODO*SIZE_BLOQUE];
+    EXT_BYTE_MAPS ext_bytemaps;
+    EXT_BLQ_INODOS ext_blq_inodos;
     EXT_ENTRADA_DIR directorio[MAX_FICHEROS];
     EXT_DATOS memdatos[MAX_BLOQUES_DATOS];
     EXT_DATOS datosfich[MAX_BLOQUES_PARTICION];
@@ -66,7 +66,7 @@ int main()
 		 
 		comandoDesconocido = 0;		 
 	    if (strcmp(orden,"dir")==0){
-            Directorio(directorio, ext_blq_inodos);
+            Directorio(directorio, &ext_blq_inodos);
 			comandoDesconocido = 1;
             continue;
 		}
@@ -84,27 +84,27 @@ int main()
 		}
 		 
 		else if(strcmp(orden,"rename")==0){
-			Renombrar(directorio, ext_blq_inodos, argumento1, argumento2);
+			Renombrar(directorio, &ext_blq_inodos, argumento1, argumento2);
 			grabardatos = 1;
 			comandoDesconocido = 1;
 			continue;
 		}
 		 
 		else if(strcmp(orden,"imprimir")==0){
-			Imprimir(directorio, ext_blq_inodos, memdatos, argumento1);
+			Imprimir(directorio, &ext_blq_inodos, memdatos, argumento1);
 			comandoDesconocido = 1;
 			continue;
 		}
 		 
 		else if(strcmp(orden,"remove")==0){
-			Borrar(directorio, ext_blq_inodos,ext_bytemaps, &ext_superblock, argumento1, fent);
+			Borrar(directorio, &ext_blq_inodos,&ext_bytemaps, &ext_superblock, argumento1, fent);
 			grabardatos = 1;
 			comandoDesconocido = 1;
 			continue;
 		}
 		 
 		else if(strcmp(orden,"copy")==0){
-			Copiar(directorio, ext_blq_inodos,ext_bytemaps, &ext_superblock, memdatos, argumento1, argumento2,  fent);
+			Copiar(directorio, &ext_blq_inodos,&ext_bytemaps, &ext_superblock, memdatos, argumento1, argumento2,  fent);
 			grabardatos = 1;
 			comandoDesconocido = 1;
 			continue;
