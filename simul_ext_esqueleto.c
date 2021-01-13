@@ -28,10 +28,10 @@ void GrabarDatos(EXT_DATOS *memdatos, FILE *fich);
 
 int main()
 {
-	char *comando[LONGITUD_COMANDO];
-	char *orden[LONGITUD_COMANDO];
-	char *argumento1[LONGITUD_COMANDO];
-	char *argumento2[LONGITUD_COMANDO];
+	char comando[LONGITUD_COMANDO];
+	char orden[LONGITUD_COMANDO];
+	char argumento1[LONGITUD_COMANDO];
+	char argumento2[LONGITUD_COMANDO];
 	 
 	int i,j;
 	unsigned long int m;
@@ -117,8 +117,8 @@ int main()
 			
 			GrabarSuperBloque(&ext_superblock,fent);
 			GrabarByteMaps(&ext_bytemaps,fent);
-			Grabarinodosydirectorio(&directorio,&ext_blq_inodos,fent);	
-			GrabarDatos(&memdatos,fent);
+			Grabarinodosydirectorio(directorio,&ext_blq_inodos,fent);	
+			GrabarDatos(memdatos,fent);
 			
 			grabardatos = 0;
 		}
@@ -230,7 +230,7 @@ int Renombrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombrea
 		printf("ERROR: Ya existe un fichero con ese nombre\n",nombrenuevo);
 		return -1;
 	}
-	strcpy(&directorio[iFichero].dir_nfich, nombrenuevo);
+	strcpy(directorio[iFichero].dir_nfich, nombrenuevo);
 	return 0;
 }
 
@@ -239,7 +239,7 @@ int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *mem
 	int i,j;//iteradores
 	int error = 1;
 	int iFichero; //indice del fichero en el directorio
-	EXT_DATOS texto[7];
+	EXT_DATOS texto[MAX_NUMS_BLOQUE_INODO];
 	
 	//Comprobar que el fichero introducido existe
 	for(i = 1; i < MAX_FICHEROS; i++){
