@@ -1,4 +1,5 @@
 #include<stdio.h>
+#include<stdlib.h>
 #include<string.h>
 #include<ctype.h>
 #include "cabeceras.h"
@@ -48,6 +49,10 @@ int main()
 	 
     // Lectura del fichero completo de una sola vez  
     fent = fopen("particion.bin","r+b");
+	if(fent == NULL){
+		printf("No se ha encontrado el fichero");
+		exit(-1);
+	}
     fread(&datosfich, SIZE_BLOQUE, MAX_BLOQUES_PARTICION, fent);        
      
     memcpy(&ext_superblock,(EXT_SIMPLE_SUPERBLOCK *)&datosfich[0], SIZE_BLOQUE);
@@ -169,12 +174,13 @@ int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argu
 }
 
 void LeeSuperBloque(EXT_SIMPLE_SUPERBLOCK *ext_superblock){
-	printf("Bloque: %d bytes\n",ext_superblock->s_inodes_count);
-	printf("InodosParticion: %d\n", ext_superblock->s_free_inodes_count);
-	printf("Inodos libres: %d\n", ext_superblock->s_blocks_count);
-	printf("Bloques Particion: %d\n", ext_superblock->s_free_blocks_count);
-	printf("Bloques libres: %d\n",ext_superblock->s_first_data_block);
-	printf("Primer bloque de datos: %d\n", SIZE_BLOQUE);
+	
+	printf("Bloque: %d bytes\n",ext_superblock->s_block_size);
+	printf("InodosParticion: %d\n",ext_superblock->s_inodes_count );
+	printf("Inodos libres: %d\n", ext_superblock->s_free_inodes_count);
+	printf("Bloques Particion: %d\n",ext_superblock->s_blocks_count );
+	printf("Bloques libres: %d\n",ext_superblock->s_free_blocks_count);
+	printf("Primer bloque de datos: %d\n", ext_superblock->s_first_data_block);
 }
 	
 void Printbytemaps(EXT_BYTE_MAPS *ext_bytemaps){
@@ -258,7 +264,7 @@ int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *mem
 	}
 	
 	//Copiamos en la variable texto los datos de los bloques que ocupa el fichero en memdatos
-	for(i = 0; i < MAX_NUMS_BLOQUE_INODO && inodos->blq_inodos[directorio[iFichero].dir_inodo].i_nbloque[i] != 0xffff; i++){
+	for(i = 0; i < MAX_NUMS_BLOQUE_INODO && inodos->blq_inodos[directorio[iFichero].dir_inodo].i_nbloque[i] != NULL_BLOQUE; i++){
 		memcpy(&texto[i], &memdatos[inodos->blq_inodos[directorio[iFichero].dir_inodo].i_nbloque[i] - PRIM_BLOQUE_DATOS], SIZE_BLOQUE);
 	}
 	
@@ -266,7 +272,10 @@ int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *mem
 	memcpy(&texto[i], "\0", 1);
 	
 	//Imprimimos el texto por pantalla
-	puts(texto);
+	puts(texto->dato);
+	
+	
+	
 	return 0;
 }
 
@@ -299,7 +308,7 @@ int Borrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_BYTE_MAPS *e
 	}
 	
 	//Actualizamos el directorio
-	strcpy(&directorio[iFichero].dir_nfich, "");
+	strcpy(directorio[iFichero].dir_nfich, "");
 	directorio[iFichero].dir_inodo = NULL_INODO; 
 	
 	ext_superblock->s_free_inodes_count++;//Actualizar el superbloque
