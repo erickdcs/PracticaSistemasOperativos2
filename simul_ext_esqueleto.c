@@ -169,11 +169,12 @@ int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argu
 }
 
 void LeeSuperBloque(EXT_SIMPLE_SUPERBLOCK *ext_superblock){
-	printf("Bloque: %d bytes\n",SIZE_BLOQUE,ext_superblock->s_inodes_count);
+	printf("Bloque: %d bytes\n",ext_superblock->s_inodes_count);
 	printf("InodosParticion: %d\n", ext_superblock->s_free_inodes_count);
-	printf("Inodos libres: %d\n", ext_superblock->s_blocks_count)
+	printf("Inodos libres: %d\n", ext_superblock->s_blocks_count);
 	printf("Bloques Particion: %d\n", ext_superblock->s_free_blocks_count);
-	printf("Bloques libres: %d\nPrimer bloque de datos: %d\n", ext_superblock->s_first_data_block);
+	printf("Bloques libres: %d\n",ext_superblock->s_first_data_block);
+	printf("Primer bloque de datos: %d\n", SIZE_BLOQUE);
 }
 	
 void Printbytemaps(EXT_BYTE_MAPS *ext_bytemaps){
@@ -218,7 +219,7 @@ int Renombrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombrea
 			iFichero = i;
 		}
 	}
-	for(i =0; j < MAX_FICHEROS&& directorio[iFichero].dir_inodo!= NULL_INODO; i++){
+	for(i =0; i < MAX_FICHEROS&& directorio[iFichero].dir_inodo!= NULL_INODO; i++){
 		if(strcmp(directorio[i].dir_nfich,nombrenuevo)==0){
 			error = 2; 
 		}
